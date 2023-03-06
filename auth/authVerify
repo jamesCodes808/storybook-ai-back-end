@@ -1,0 +1,25 @@
+//this is our middleware that will handle verify user's authentication before giving them access to CRUD/REST
+
+// require dependencies
+const jwt = require("jsonwebtoken");
+const jwksClient = require("jwks-rsa"); //jwks = json web key set
+
+// function that will verify users authentication
+const verifyUser = (request, response, next) => {
+  // adds a 'user' property/parameter to the request
+  const isValid = (err, user) => {
+    request.user = user;
+    next();
+  };
+
+  try {
+    // checks request headers for authorization information, gets 2nd part of that information
+    const token = request.headers.authorization.split(" ")[1];
+    //
+    jwt.verify(token, getKey, {}, isValid);
+  } catch (error) {
+    next(`User Not Authorized`);
+  }
+};
+
+module.exports = verifyUser;
