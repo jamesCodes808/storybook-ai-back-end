@@ -7,6 +7,15 @@
 - Ethan Albers
 - Reed Vogt
 
+## Domain Model
+
+![wrrc](assets/wrrc.png)
+
+## Database Schema 
+
+
+![database schema](assets/database_schema.png)
+
 ## Cooperation Plan
 
 <details closed> <summary> Coop Plan </summary>
