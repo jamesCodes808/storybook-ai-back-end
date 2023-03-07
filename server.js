@@ -8,11 +8,11 @@ const app = express();
 app.use(cors());
 const PORT = process.env.PORT || 3001;
 
-// const getWeather = require("./modules/weather");
+const getAbout = require("./modules/about");
 // const getMovies = require("./modules/movies");
 // const getYelp = require("./modules/yelp");
 
-// app.get("/weather", getWeather);
+app.get("/about", getAbout);
 // app.get("/movies", getMovies);
 // app.get("/yelp", getYelp);
 
