@@ -66,22 +66,21 @@ router.post('/books', async (request, response) => {
     }
 }); */
 
-/* router.delete('/books/:id', async (request, response) => {
-    const { id } = request.params.id;
-    const { email } = request.user.email;
+router.delete('/books/:id', async (request, response) => {
+    const id = request.params.id;
 
     try {
-        const book = await Book.findOne({ _id: id, email });
-        if (!book) {
-            response.status(400).send('unable to delete book');
-        } else {
+
+        if (await Book.findById(id)) {
             await Book.findByIdAndDelete(id);
-            response.status(204).send(`successfully deleted ${id}`);
+            response.status(200).send(`successfully deleted ${id}`);
+        } else {
+            response.status(404).send(`unable to find book with id ${id}`);
         }
     } catch (error) {
         response.status(404).send(`unable to delete book with id ${id}`);
     }
-}) */
+})
 
 /* router.get('/user', async (response, request) => {
     console.log('getting user');

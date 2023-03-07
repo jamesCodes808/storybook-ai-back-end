@@ -7,7 +7,7 @@ const Book = require('./models/BookModel');
 
 async function seed() {
     let dogRunPark = await Book.create({
-        title: 'Dog Runing in Park',
+        title: 'Dog Running in Park',
         story: 'Dog dashes through park, Paws pounding on dirt. Tail wagging wildly, Tongue lolling out merrily.'
     });
 
