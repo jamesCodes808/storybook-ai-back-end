@@ -1,5 +1,6 @@
 const express = require('express');
 const Book = require('../models/BookModel');
+const Page = require('../models/PageModel');
 const router = express.Router();
 const { Configuration, OpenAIApi } = require('openai');
 
@@ -11,7 +12,6 @@ const openai = new OpenAIApi(configuration);
 
 router.get('', async (request, response) => {
     const books = await Book.find({ email: request.user.email });
-    console.log(books);
     response.status(200).json(books);
 });
 
@@ -36,19 +36,32 @@ router.post('', async (request, response) => {
         temperature: 0.5,
     });
 
-    const coverPrompt = title + ', in the style of the childrens book Good Night Moon';
+    const story = aiBook.data.choices[0].text;
 
+    let pagesArray = story.split('. ' || ', ').map(async item => {
+        const pagePic = await openai.createImage({
+            prompt: item,
+            n: 1,
+            size: '256x256',
+            response_format: 'b64_json'
+        })
+        let page = await Page.create({ picture: pagePic.data.data[0].b64_json, text: item });
+        console.log('********PAGE*******');
+        console.log(page);
+        return await page._id;
+    });
+
+    const coverPrompt = title + ', in the style of the childrens book Good Night Moon';
     const aiCover = await openai.createImage({
         prompt: coverPrompt,
         n: 1,
-        size: '256x256'
+        size: '256x256',
+        response_format: 'b64_json'
     });
-
-    const story = aiBook.data.choices[0].text;
-    const cover = aiCover.data.data[0].url;
+    const cover = aiCover.data.data[0].b64_json;
 
     try {
-        const newBook = await Book.create({ title: title, story: story, cover: cover, email: request.user.email });
+        const newBook = await Book.create({ title: title, story: story, cover: cover, pages: pagesArray, email: request.user.email });
         response.status(200).json(newBook);
     } catch (error) {
         console.error(error);
