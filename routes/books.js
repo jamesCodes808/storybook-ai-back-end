@@ -19,6 +19,7 @@ router.get('', async (request, response) => {
 
 router.post('', async (request, response) => {
     const { title, noun, verb, location } = request.body;
+
     console.log(request.body);
     console.log(title);
     console.log(noun);
@@ -35,15 +36,22 @@ router.post('', async (request, response) => {
         temperature: 0.5,
     });
 
-    console.log(aiBook.data.choices)
+    const coverPrompt = title + ', in the style of the childrens book Good Night Moon';
+
+    const aiCover = await openai.createImage({
+        prompt: coverPrompt,
+        n: 1,
+        size: '256x256'
+    });
 
     const story = aiBook.data.choices[0].text;
-    console.log(story);
+    const cover = aiCover.data.data[0].url;
 
     try {
-        const newBook = await Book.create({ title: title, story: story, email: request.user.email });
+        const newBook = await Book.create({ title: title, story: story, cover: cover, email: request.user.email });
         response.status(200).json(newBook);
     } catch (error) {
+        console.error(error);
         response.status(500).json("there was an error post");
     }
 })
@@ -51,7 +59,7 @@ router.post('', async (request, response) => {
 /* router.put('/books/:id', async (request, response) => {
     const id = request.params.id;
     const { email } = request.user.email;
-
+ 
     try {
         const book = await Book.findOne({ _id: id, email: email });
         if (!book) {
