@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const app = express();
+const verifyUser = require('./auth/authorize');
 
 const PORT = process.env.PORT
 const Books = require('./routes/books');
@@ -12,13 +13,14 @@ const DATABASE_URL = process.env.DATABASE_URL;
 
 app.use(cors());
 app.use(express.json());
+app.use(verifyUser);
 
 app.use((request, response, next) => {
     console.log(request.path, request.method);
     next();
 });
 
-app.use('/', Books);
+app.use('/books', Books);
 
 mongoose.connect(DATABASE_URL)
     .then(() => {

@@ -9,15 +9,15 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-router.get('/books', async (request, response) => {
-    const books = await Book.find();
+router.get('', async (request, response) => {
+    const books = await Book.find({ email: request.user.email });
     console.log(books);
     response.status(200).json(books);
 });
 
 // create a 4 sentence story with 4 words each sentence of a ${noun} ${verb} at ${location}
 
-router.post('/books', async (request, response) => {
+router.post('', async (request, response) => {
     const { title, noun, verb, location } = request.body;
     console.log(request.body);
     console.log(title);
@@ -41,7 +41,7 @@ router.post('/books', async (request, response) => {
     console.log(story);
 
     try {
-        const newBook = await Book.create({ title: title, story: story });
+        const newBook = await Book.create({ title: title, story: story, email: request.user.email });
         response.status(200).json(newBook);
     } catch (error) {
         response.status(500).json("there was an error post");
@@ -53,7 +53,7 @@ router.post('/books', async (request, response) => {
     const { email } = request.user.email;
 
     try {
-        const book = await Book.findOne({ _id: id, email });
+        const book = await Book.findOne({ _id: id, email: email });
         if (!book) {
             response.status(400).send('unable to update book');
         } else {
@@ -66,12 +66,12 @@ router.post('/books', async (request, response) => {
     }
 }); */
 
-router.delete('/books/:id', async (request, response) => {
+router.delete('/:id', async (request, response) => {
     const id = request.params.id;
+    const email = request.user.email;
 
     try {
-
-        if (await Book.findById(id)) {
+        if (await Book.findOne({ _id: id, email: email })) {
             await Book.findByIdAndDelete(id);
             response.status(200).send(`successfully deleted ${id}`);
         } else {
