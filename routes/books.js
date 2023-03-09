@@ -16,15 +16,22 @@ router.get('', async (request, response) => {
 
 
 
-    books.forEach(async book => {
-        await Book.findById(book._id).populate({
+    const sendBooks = books.map(async book => {
+        const popBooks = await Book.findById(book._id).populate({
             path: "pages"
         })
+
+        return popBooks;
     })
 
-    
+    const populatedBooks = await Promise.all(sendBooks);
 
-    response.status(200).json(books);
+    console.log('**************sendBooks************');
+    console.log(populatedBooks);
+
+
+
+    response.status(200).json(populatedBooks);
 });
 
 // create a 4 sentence story with 4 words each sentence of a ${noun} ${verb} at ${location}
