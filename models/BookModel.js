@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const Page = require('./PageModel');
 
 const bookSchema = new mongoose.Schema({
@@ -15,8 +16,8 @@ const bookSchema = new mongoose.Schema({
         required: true
     },
     pages: [{
-        type: [Page.Schema],
-        ref: 'Page'
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Page"
     }],
     email: {
         type: String,

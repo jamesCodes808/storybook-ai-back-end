@@ -11,7 +11,19 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 router.get('', async (request, response) => {
+
     const books = await Book.find({ email: request.user.email });
+
+
+
+    books.forEach(async book => {
+        await Book.findById(book._id).populate({
+            path: "pages"
+        })
+    })
+
+    
+
     response.status(200).json(books);
 });
 
@@ -38,6 +50,8 @@ router.post('', async (request, response) => {
 
     const story = aiBook.data.choices[0].text;
 
+    // console.log('-------------------STORY-----------------', story)
+
     let pagesArray = story.split('. ' || ', ').map(async item => {
         const pagePic = await openai.createImage({
             prompt: item,
@@ -46,12 +60,13 @@ router.post('', async (request, response) => {
             response_format: 'b64_json'
         })
         let page = await Page.create({ picture: pagePic.data.data[0].b64_json, text: item });
-        console.log('********PAGE*******');
-        console.log(page);
-        return await page._id;
+        // console.log('********PAGE*******');
+        // console.log(page);
+        return page;
     });
 
-    const coverPrompt = title + ', in the style of the childrens book Good Night Moon';
+
+    const coverPrompt = title + ", in the style of a children's book";
     const aiCover = await openai.createImage({
         prompt: coverPrompt,
         n: 1,
@@ -60,8 +75,39 @@ router.post('', async (request, response) => {
     });
     const cover = aiCover.data.data[0].b64_json;
 
+    const pages = await Promise.all(pagesArray)
+
+    // const insertedPages = await Page.insertMany([
+    //     pagesArray
+    // ])
+
+    // const listOfPagesIds = await Promise.all(insertedPages.map(page => page._id))
+
+    // const insertedBook = await Book.create({
+    //     title: title,
+    //     story: story,
+    //     cover: cover,
+    //     pages: listOfPagesIds,
+    //     email: request.user.email
+    // })
+
+    // const populatedBook = await Page.findById(insertedBook._id).
+    //     populate({
+    //         path: "pages"
+    //     })
+
+
     try {
-        const newBook = await Book.create({ title: title, story: story, cover: cover, pages: pagesArray, email: request.user.email });
+
+        // console.log('------------------------POPULATED BOOK WITH PAGES--------------', populatedBook)
+
+        const newBook = await Book.create({
+            title: title,
+            story: story,
+            cover: cover,
+            pages: pages,
+            email: request.user.email
+        });
         response.status(200).json(newBook);
     } catch (error) {
         console.error(error);
