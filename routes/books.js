@@ -61,7 +61,7 @@ router.post('', async (request, response) => {
 
     let pagesArray = story.split('. ' || ', ').map(async item => {
         const pagePic = await openai.createImage({
-            prompt: item,
+            prompt: `${item} in the style of a children's book`,
             n: 1,
             size: '256x256',
             response_format: 'b64_json'
