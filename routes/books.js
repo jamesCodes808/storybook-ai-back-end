@@ -23,9 +23,6 @@ router.get('', async (request, response) => {
 
     const populatedBooks = await Promise.all(sendBooks);
 
-    console.log('**************sendBooks************');
-    console.log(populatedBooks);
-
     if (populatedBooks.length > 0) {
         response.status(200).json(populatedBooks);
     } else {
@@ -33,19 +30,10 @@ router.get('', async (request, response) => {
     }
 });
 
-// create a 4 sentence story with 4 words each sentence of a ${noun} ${verb} at ${location}
-
 router.post('', async (request, response) => {
     const { title, noun, verb, location } = request.body;
 
-    console.log(request.body);
-    console.log(title);
-    console.log(noun);
-    console.log(verb);
-    console.log(location, '\n');
-
     const prompt = `Create a 4 sentence story with 4 words each sentence of ${noun} ${verb} at ${location}`;
-    console.log(prompt);
 
     const aiBook = await openai.createCompletion({
         model: 'text-davinci-003',
@@ -55,8 +43,6 @@ router.post('', async (request, response) => {
     });
 
     const story = aiBook.data.choices[0].text;
-
-    // console.log('-------------------STORY-----------------', story)
 
     let pagesArray = story.split('. ' || ', ').map(async (item) => {
         const pagePic = await openai.createImage({
@@ -69,8 +55,6 @@ router.post('', async (request, response) => {
             picture: pagePic.data.data[0].b64_json,
             text: item,
         });
-        // console.log('********PAGE*******');
-        // console.log(page);
         return page;
     });
 
@@ -85,27 +69,7 @@ router.post('', async (request, response) => {
 
     const pages = await Promise.all(pagesArray);
 
-    // const insertedPages = await Page.insertMany([
-    //     pagesArray
-    // ])
-
-    // const listOfPagesIds = await Promise.all(insertedPages.map(page => page._id))
-
-    // const insertedBook = await Book.create({
-    //     title: title,
-    //     story: story,
-    //     cover: cover,
-    //     pages: listOfPagesIds,
-    //     email: request.user.email
-    // })
-
-    // const populatedBook = await Page.findById(insertedBook._id).
-    //     populate({
-    //         path: "pages"
-    //     })
-
     try {
-        // console.log('------------------------POPULATED BOOK WITH PAGES--------------', populatedBook)
 
         const newBook = await Book.create({
             title: title,
@@ -121,24 +85,6 @@ router.post('', async (request, response) => {
     }
 });
 
-/* router.put('/books/:id', async (request, response) => {
-    const id = request.params.id;
-    const { email } = request.user.email;
- 
-    try {
-        const book = await Book.findOne({ _id: id, email: email });
-        if (!book) {
-            response.status(400).send('unable to update book');
-        } else {
-            let updatedBook = await Book.findByIdAndUpdate(id, request.body, { new: true });
-            response.status(202).json(updatedBook);
-        }
-    } catch (error) {
-        response.status(404).send('unable to update');
-        console.error(error);
-    }
-}); */
-
 router.delete('/:id', async (request, response) => {
     const id = request.params.id;
     const email = request.user.email;
@@ -147,7 +93,6 @@ router.delete('/:id', async (request, response) => {
     try {
         if (deleteBook) {
             deleteBook.pages.forEach(async item => {
-                console.log(Page.findById({ _id: item }));
                 await Page.findByIdAndDelete({ _id: item })
             });
             await Book.findByIdAndDelete(id);
@@ -159,10 +104,5 @@ router.delete('/:id', async (request, response) => {
         response.status(404).send(`unable to delete book with id ${id}`);
     }
 });
-
-/* router.get('/user', async (response, request) => {
-    console.log('getting user');
-    response.status(200).send(request.user);
-}) */
 
 module.exports = router;
