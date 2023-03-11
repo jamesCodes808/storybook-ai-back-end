@@ -3,7 +3,7 @@ require('dotenv').config();
 
 mongoose.connect(process.env.DATABASE_URL);
 
-const Book = require('./models/BookModel');
+const Book = require('../models/BookModel');
 
 async function seed() {
     let dogRunPark = await Book.create({

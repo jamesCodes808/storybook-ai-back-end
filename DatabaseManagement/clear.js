@@ -3,8 +3,8 @@ require('dotenv').config();
 
 mongoose.connect(process.env.DATABASE_URL);
 
-const Book = require('./models/BookModel');
-const Page = require('./models/PageModel');
+const Book = require('../models/BookModel');
+const Page = require('../models/PageModel');
 
 async function clear() {
     try {
